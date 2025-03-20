@@ -27,6 +27,10 @@ To complete the task, follow the steps below:
 5.	Configure Spring Security as described below.
 6. Add `@RestController` on creating new users functionality.
 
+1. Add a database table that will store users. It must have at least three columns:
+   1. username — string, not null, unique
+   2. password — string, not null
+
 ### Security Configuration Requirements
 
 You will implement the RBAC model, so the main idea is to restrict access to endpoints based on roles, where:
