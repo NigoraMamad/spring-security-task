@@ -30,6 +30,11 @@ To complete the task, follow the steps below:
 1. Add a database table that will store users. It must have at least three columns:
    1. username — string, not null, unique
    2. password — string, not null
+2. Add a database table that will store roles. It must have one column:
+   1. name — string, not null, unique
+3. Add join-table between roles and users as they have a many-to-many relation.
+
+
 
 ### Security Configuration Requirements
 
