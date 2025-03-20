@@ -33,8 +33,12 @@ To complete the task, follow the steps below:
 2. Add a database table that will store roles. It must have one column:
    1. name — string, not null, unique
 3. Add join-table between roles and users as they have a many-to-many relation.
-
-
+4. Populate the role table with three roles:
+   1. ADMIN
+   2. PROFESSOR
+   3. STUDENT
+5. Configure Spring Security as described below.
+6. Add `@RestController` on creating new users functionality.
 
 ### Security Configuration Requirements
 
