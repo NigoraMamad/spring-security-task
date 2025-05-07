@@ -10,4 +10,5 @@ public interface UserService {
     void createUser(UserDTO dto);
     Optional<User> findByUsername(String username);
     List<User> getAllUsers();
+    void deleteUserById(Long id);
 }

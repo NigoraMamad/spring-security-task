@@ -11,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -52,5 +53,13 @@ public class UserServiceImpl implements UserService {
         public List<User> getAllUsers() {
             return userRepo.findAll();
         }
+
+    @Override
+    public void deleteUserById(Long id) {
+        if (!userRepo.existsById(id)) {
+            throw new NoSuchElementException("User with ID " + id + " not found.");
+        }
+        userRepo.deleteById(id);
+    }
     }
 
