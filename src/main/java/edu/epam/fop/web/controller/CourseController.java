@@ -1,30 +1,52 @@
 package edu.epam.fop.web.controller;
 
-import org.springframework.http.ResponseEntity;
+import edu.epam.fop.web.entity.Course;
+import edu.epam.fop.web.service.CourseService;
+import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
+@Controller
 @RequestMapping("/courses")
 public class CourseController {
 
-    @GetMapping
-    public ResponseEntity<String> getAllCourses() {
-        return ResponseEntity.ok("List of all courses (public endpoint)");
+    private final CourseService courseService;
+
+    public CourseController(CourseService courseService) {
+        this.courseService = courseService;
+    }
+
+    @GetMapping("/new")
+    public String newCourseForm(Model model) {
+        model.addAttribute("course", new Course());
+        return "course_form";
     }
 
     @PostMapping
-    public ResponseEntity<String> createCourse(@RequestBody String course) {
-        return ResponseEntity.ok("Created course: " + course);
+    public String createCourse(@ModelAttribute Course course) {
+        courseService.save(course);
+        return "redirect:/";
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<String> updateCourse(@PathVariable("id") Long id, @RequestBody String course) {
-        return ResponseEntity.ok("Updated course with ID: " + id);
+    @GetMapping("/edit/{id}")
+    public String editCourseForm(@PathVariable("id") Long id, Model model) {
+        Course course = courseService.findById(id).orElseThrow();
+        model.addAttribute("course", course);
+        return "course_form";
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteCourse(@PathVariable("id") Long id) {
-        return ResponseEntity.ok("Deleted course with ID: " + id);
+    @PostMapping("/update/{id}")
+    public String updateCourse(@PathVariable("id") Long id, @ModelAttribute Course course) {
+        Course existing = courseService.findById(id).orElseThrow();
+        existing.setTitle(course.getTitle());
+        existing.setDescription(course.getDescription());
+        courseService.save(existing);
+        return "redirect:/";
+    }
+
+    @GetMapping("/delete/{id}")
+    public String deleteCourse(@PathVariable Long id) {
+        courseService.deleteById(id);
+        return "redirect:/";
     }
 }
-

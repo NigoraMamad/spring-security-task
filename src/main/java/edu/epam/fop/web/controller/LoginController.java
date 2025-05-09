@@ -8,7 +8,7 @@ public class LoginController {
 
     @GetMapping("/login")
     public String loginPage() {
-        return "login"; // maps to templates/login.html
+        return "login";
     }
 }
 

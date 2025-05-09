@@ -1,7 +1,5 @@
 package edu.epam.fop.web.config;
 
-import edu.epam.fop.web.service.CustomUserDetailsService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
@@ -14,71 +12,45 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.servlet.util.matcher.MvcRequestMatcher;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
+import org.springframework.web.servlet.handler.HandlerMappingIntrospector;
 
 @Configuration
 @EnableWebSecurity
-@ComponentScan(basePackages = "edu.epam.fop.web")
 public class SecurityConfig {
 
-    private final UserDetailsService userDetailsService;
-
-    public SecurityConfig(UserDetailsService userDetailsService) {
-        this.userDetailsService = userDetailsService;
+    // For Spring MVC matchers (safe for ServletContext with JSP & DispatcherServlet)
+    @Bean
+    public MvcRequestMatcher.Builder mvcRequestMatcherBuilder(HandlerMappingIntrospector introspector) {
+        return new MvcRequestMatcher.Builder(introspector);
     }
 
+    // PasswordEncoder bean (needed for UserSeeder and auth logic)
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
+    // Main SecurityFilterChain configuration
     @Bean
-    public DaoAuthenticationProvider authProvider() {
-        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
-        provider.setUserDetailsService(userDetailsService);
-        provider.setPasswordEncoder(passwordEncoder());
-        return provider;
+    public SecurityFilterChain filterChain(HttpSecurity http, MvcRequestMatcher.Builder mvc) throws Exception {
+        http
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers(mvc.pattern("/login")).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .formLogin(form -> form
+                        .loginPage("/login")                         // custom login page
+                        .loginProcessingUrl("/login")               // POST endpoint for login form
+                        .defaultSuccessUrl("/home", true)           // redirect after login
+                        .permitAll()
+                )
+                .logout(logout -> logout
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                );
+
+        return http.build();
     }
-
-//    @Bean
-//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http
-//                .csrf(csrf -> csrf.disable())
-//                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
-//                        .requestMatchers(new AntPathRequestMatcher("/users")).hasRole("ADMIN")
-//                        .requestMatchers(new AntPathRequestMatcher("/users/**", "PUT")).hasAnyRole("ADMIN", "PROFESSOR")
-//                        .requestMatchers(new AntPathRequestMatcher("/students/**")).authenticated()
-//                        .requestMatchers(new AntPathRequestMatcher("/courses/**")).permitAll()
-//                        .anyRequest().authenticated()
-//                )
-//                .formLogin(login -> login
-//                        .loginPage("/login") // path to your login.html
-//                        .permitAll()
-//                )
-//                .logout(logout -> logout
-//                        .logoutUrl("/logout")
-//                        .logoutSuccessUrl("/")
-//                        .permitAll()
-//                );
-//
-//        return http.build();
-//    }
-@Bean
-public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-    http
-            .csrf(csrf -> csrf.disable())
-            .authorizeHttpRequests(auth -> auth
-                    .requestMatchers(new AntPathRequestMatcher("/"), new AntPathRequestMatcher("/login"), new AntPathRequestMatcher("/courses"), new AntPathRequestMatcher("/courses/**", "GET")).permitAll()
-                    .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
-                    .requestMatchers(new AntPathRequestMatcher("/users/**", "PUT")).hasAnyRole("ADMIN", "PROFESSOR")
-                    .requestMatchers(new AntPathRequestMatcher("/students/**")).authenticated()
-                    .requestMatchers(new AntPathRequestMatcher("/courses/**", "POST")).hasRole("ADMIN")
-                    .requestMatchers(new AntPathRequestMatcher("/courses/**", "DELETE")).hasRole("ADMIN")
-                    .anyRequest().authenticated()
-            )
-            .httpBasic(Customizer.withDefaults());
-
-    return http.build();
-}
 }
