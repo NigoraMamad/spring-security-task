@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>University Home</title>
+</head>
+<body>
+<h1>Welcome to the University Portal</h1>
+
+<p th:if="${#request.remoteUser != null}">
+    Logged in as: <strong th:text="${#request.remoteUser}"></strong>
+    | <a th:href="@{/logout}">Logout</a>
+</p>
+
+<p th:if="${#request.remoteUser == null}">
+    You are not logged in.
+    <a th:href="@{/login}">Login here</a>
+</p>
+
+
+<p><a th:href="@{/courses}">View Courses</a></p>
+</body>
+</html>

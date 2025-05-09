@@ -10,18 +10,20 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 @Configuration
 @EnableWebSecurity
 @ComponentScan(basePackages = "edu.epam.fop.web")
 public class SecurityConfig {
 
-    private final CustomUserDetailsService userDetailsService;
+    private final UserDetailsService userDetailsService;
 
-    public SecurityConfig(CustomUserDetailsService userDetailsService) {
+    public SecurityConfig(UserDetailsService userDetailsService) {
         this.userDetailsService = userDetailsService;
     }
 
@@ -38,20 +40,45 @@ public class SecurityConfig {
         return provider;
     }
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http
-                .csrf(csrf -> csrf.disable()) // disable CSRF for stateless APIs
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.POST, "/users").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PUT, "/users/**").hasAnyRole("ADMIN", "PROFESSOR")
-                        .requestMatchers("/students/**").authenticated()
-                        .requestMatchers("/courses/**").permitAll()
-                        .anyRequest().authenticated()
-                )
-                .httpBasic(Customizer.withDefaults());
+//    @Bean
+//    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        http
+//                .csrf(csrf -> csrf.disable())
+//                .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
+//                        .requestMatchers(new AntPathRequestMatcher("/users")).hasRole("ADMIN")
+//                        .requestMatchers(new AntPathRequestMatcher("/users/**", "PUT")).hasAnyRole("ADMIN", "PROFESSOR")
+//                        .requestMatchers(new AntPathRequestMatcher("/students/**")).authenticated()
+//                        .requestMatchers(new AntPathRequestMatcher("/courses/**")).permitAll()
+//                        .anyRequest().authenticated()
+//                )
+//                .formLogin(login -> login
+//                        .loginPage("/login") // path to your login.html
+//                        .permitAll()
+//                )
+//                .logout(logout -> logout
+//                        .logoutUrl("/logout")
+//                        .logoutSuccessUrl("/")
+//                        .permitAll()
+//                );
+//
+//        return http.build();
+//    }
+@Bean
+public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    http
+            .csrf(csrf -> csrf.disable())
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers(new AntPathRequestMatcher("/"), new AntPathRequestMatcher("/login"), new AntPathRequestMatcher("/courses"), new AntPathRequestMatcher("/courses/**", "GET")).permitAll()
+                    .requestMatchers(new AntPathRequestMatcher("/admin/**")).hasRole("ADMIN")
+                    .requestMatchers(new AntPathRequestMatcher("/users/**", "PUT")).hasAnyRole("ADMIN", "PROFESSOR")
+                    .requestMatchers(new AntPathRequestMatcher("/students/**")).authenticated()
+                    .requestMatchers(new AntPathRequestMatcher("/courses/**", "POST")).hasRole("ADMIN")
+                    .requestMatchers(new AntPathRequestMatcher("/courses/**", "DELETE")).hasRole("ADMIN")
+                    .anyRequest().authenticated()
+            )
+            .httpBasic(Customizer.withDefaults());
 
-        return http.build();
-    }
+    return http.build();
+}
 }
