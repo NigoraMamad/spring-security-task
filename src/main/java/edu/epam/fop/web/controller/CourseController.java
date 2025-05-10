@@ -6,6 +6,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @Controller
 @RequestMapping("/courses")
 public class CourseController {
@@ -20,6 +22,12 @@ public class CourseController {
     public String newCourseForm(Model model) {
         model.addAttribute("course", new Course());
         return "course_form";
+    }
+
+    @GetMapping
+    public String listCourses(Model model) {
+        model.addAttribute("courses", courseService.findAll());
+        return "course_list";
     }
 
     @PostMapping

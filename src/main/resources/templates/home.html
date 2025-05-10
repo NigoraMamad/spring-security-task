@@ -1,46 +1,38 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>University Management Portal</title>
+    <title>University Portal</title>
+    <meta charset="UTF-8"/>
 </head>
 <body>
-<h1>University Management Portal</h1>
+<h1>Welcome to the University Portal</h1>
 
-<!-- For UNAUTHENTICATED users -->
-<div th:if="${!isAuthenticated}">
-    <h3>🔐 Demo Instructions</h3>
-    <p>Please use the login form and try one of these demo accounts:</p>
+<div th:if="${isAuthenticated}">
+    <p>Hello, <b th:text="${username}">User</b>!</p>
+    <p>Your role: <b th:text="${role}">Role</b></p>
+
     <ul>
-        <li><strong>admin / admin123</strong> – full access to users & courses</li>
-        <li><strong>professor / prof123</strong> – can view courses and update students</li>
-        <li><strong>student / stud123</strong> – read-only access</li>
-    </ul>
-    <p>After login, the app will redirect you to the home page with role-based actions.</p>
+        <li><a th:href="@{/courses}">View Courses</a></li>
 
-    <p><a th:href="@{/login}">Go to Login</a></p>
+        <li th:if="${role == 'admin'}">
+            <a th:href="@{/courses/new}">Create Course</a>
+        </li>
+
+        <li th:if="${role == 'admin'}">
+            <a th:href="@{/admin/users-ui}"> Manage Users</a>
+        </li>
+
+        <li th:if="${role == 'admin' or role == 'professor'}">
+            <a th:href="@{/students}">Manage Students</a>
+        </li>
+
+        <li><a th:href="@{/logout}">Logout</a></li>
+    </ul>
+
 </div>
 
-<!-- For AUTHENTICATED users -->
-<div th:if="${isAuthenticated}">
-    <p>Welcome, <strong th:text="${username}">User</strong>!</p>
-    <p>You are logged in as: <strong th:text="${role}">role</strong>.</p>
-
-    <h3>Your Available Actions</h3>
-    <ul>
-        <li th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
-            <a th:href="@{/admin/users}">Manage Users</a>
-        </li>
-        <li th:if="${#authorization.expression('hasAnyRole(''ADMIN'',''PROFESSOR'')')}">
-            <a th:href="@{/students}">View or Update Students</a>
-        </li>
-        <li><a th:href="@{/courses}">View Courses</a></li>
-        <li th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
-            <a th:href="@{/courses/new}"> Add Course</a>
-        </li>
-    </ul>
-
-    <p><a th:href="@{/logout}">Logout</a></p>
+<div th:unless="${isAuthenticated}">
+    <p>Please <a th:href="@{/login}">login</a> to access the system.</p>
 </div>
 </body>
 </html>

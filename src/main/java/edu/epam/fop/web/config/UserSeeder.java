@@ -1,58 +1,42 @@
 package edu.epam.fop.web.config;
 
+import edu.epam.fop.web.dto.UserDTO;
 import edu.epam.fop.web.entity.Role;
 import edu.epam.fop.web.entity.User;
 import edu.epam.fop.web.repository.RoleRepository;
 import edu.epam.fop.web.repository.UserRepository;
+import edu.epam.fop.web.service.UserService;
 import jakarta.annotation.PostConstruct;
-import org.springframework.context.annotation.DependsOn;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
 @Component
-@DependsOn("roleSeeder") // Ensures RoleSeeder runs before this
 public class UserSeeder {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
-    private final PasswordEncoder passwordEncoder;
+    private final UserService userService;
 
-    public UserSeeder(UserRepository userRepository,
-                      RoleRepository roleRepository,
-                      PasswordEncoder passwordEncoder) {
+    public UserSeeder(UserRepository userRepository, UserService userService) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
-        this.passwordEncoder = passwordEncoder;
+        this.userService = userService;
     }
 
     @PostConstruct
     public void seedUsers() {
-        createIfNotExists("admin", "admin123", "ADMIN");
-        createIfNotExists("professor", "prof123", "PROFESSOR");
-        createIfNotExists("student", "stud123", "STUDENT");
-    }
+        List<UserDTO> demoUsers = List.of(
+                new UserDTO("admin", "admin123", Set.of("ADMIN")),
+                new UserDTO("professor", "prof123", Set.of("PROFESSOR")),
+                new UserDTO("student", "stud123", Set.of("STUDENT"))
+        );
 
-    private void createIfNotExists(String username, String rawPassword, String roleName) {
-        if (userRepository.findByUsername(username).isPresent()) {
-            return; // User already exists
+        for (UserDTO dto : demoUsers) {
+            if (userRepository.findByUsername(dto.getUsername()).isEmpty()) {
+                userService.createUser(dto);
+                System.out.println("Seeded user: " + dto.getUsername());
+            }
         }
-
-        Optional<Role> roleOpt = roleRepository.findByName(roleName);
-        if (roleOpt.isEmpty()) {
-            System.err.println("⚠️ Cannot create user '" + username + "' — missing role: " + roleName);
-            return;
-        }
-
-        Role role = roleOpt.get();
-        User user = new User();
-        user.setUsername(username);
-        user.setPassword(passwordEncoder.encode(rawPassword));
-        user.setRoles(Set.of(role));
-
-        userRepository.save(user);
-        System.out.println("✅ Demo user created: " + username + " with role " + roleName);
     }
 }

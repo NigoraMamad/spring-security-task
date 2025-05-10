@@ -4,6 +4,7 @@ import edu.epam.fop.web.dto.UserDTO;
 import edu.epam.fop.web.entity.User;
 import edu.epam.fop.web.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -33,6 +34,19 @@ public class AdminController {
     @GetMapping("/users")
     public ResponseEntity<List<User>> getAllUsers() {
         return ResponseEntity.ok(userService.getAllUsers());
+    }
+
+    @GetMapping("/users-ui")
+    public String userForm(Model model) {
+        model.addAttribute("userDTO", new UserDTO());
+        model.addAttribute("users", userService.getAllUsers());
+        return "admin_users";
+    }
+
+    @PostMapping("/users-ui")
+    public String createUserWeb(@ModelAttribute UserDTO dto) {
+        userService.createUser(dto);
+        return "redirect:/admin/users-ui";
     }
 }
 
