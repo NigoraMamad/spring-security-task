@@ -1,38 +1,31 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>University Portal</title>
-    <meta charset="UTF-8"/>
-</head>
+<head><title>University Portal</title></head>
 <body>
 <h1>Welcome to the University Portal</h1>
 
 <div th:if="${isAuthenticated}">
-    <p>Hello, <b th:text="${username}">User</b>!</p>
-    <p>Your role: <b th:text="${role}">Role</b></p>
+    <p>You are logged in as <strong th:text="${username}"></strong> with role <strong th:text="${role}"></strong>.</p>
+    <p><a th:href="@{/courses}"> View All Courses</a></p>
+    <p><a th:href="@{/students}"> View Students</a></p>
 
-    <ul>
-        <li><a th:href="@{/courses}">View Courses</a></li>
+    <th:block th:if="${role == 'admin'}">
+        <p><a th:href="@{/courses/new}"> Add New Course</a></p>
+        <p><a th:href="@{/admin/users}"> View All Users</a></p>
+        <p><a th:href="@{/admin/users/new}"> Create New User</a></p>
+    </th:block>
 
-        <li th:if="${role == 'admin'}">
-            <a th:href="@{/courses/new}">Create Course</a>
-        </li>
-
-        <li th:if="${role == 'admin'}">
-            <a th:href="@{/admin/users-ui}"> Manage Users</a>
-        </li>
-
-        <li th:if="${role == 'admin' or role == 'professor'}">
-            <a th:href="@{/students}">Manage Students</a>
-        </li>
-
-        <li><a th:href="@{/logout}">Logout</a></li>
-    </ul>
-
+    <form th:action="@{/logout}" method="post">
+        <button type="submit"> Logout</button>
+    </form>
 </div>
 
 <div th:unless="${isAuthenticated}">
-    <p>Please <a th:href="@{/login}">login</a> to access the system.</p>
+    <p>Welcome, guest! You can:</p>
+    <ul>
+        <li><a th:href="@{/courses}"> View Available Courses</a></li>
+        <li><a th:href="@{/login}"> Log In</a> to access more features</li>
+    </ul>
 </div>
 </body>
 </html>

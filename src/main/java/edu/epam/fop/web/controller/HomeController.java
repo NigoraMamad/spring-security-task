@@ -11,12 +11,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 @Controller
 public class HomeController {
 
-    private final CourseService courseService;
-
-    public HomeController(CourseService courseService) {
-        this.courseService = courseService;
-    }
-
     @GetMapping("/")
     public String home(Model model) {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();

@@ -7,8 +7,11 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserService {
-    void createUser(UserDTO dto);
-    Optional<User> findByUsername(String username);
     List<User> getAllUsers();
+    void createUser(UserDTO dto);
     void deleteUserById(Long id);
+    Optional<User> findByUsername(String username);
+    Optional<User> findById(Long id);
+    User save(User user);
+    List<User> getAllStudents();
 }

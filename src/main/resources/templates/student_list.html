@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>All Students</title></head>
+<body>
+<h2>Student List</h2>
+<table border="1">
+    <thead>
+    <tr>
+        <th>Username</th>
+        <th th:if="${role == 'admin' or role == 'professor'}">Actions</th>
+    </tr>
+    </thead>
+    <tbody>
+    <tr th:each="student : ${students}">
+        <td th:text="${student.username}">Student Name</td>
+        <td th:if="${role == 'admin' or role == 'professor'}">
+            <a th:href="@{'/students/edit/' + ${student.id}}"> Edit</a>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<p><a th:href="@{/}"> Back to Home</a></p>
+</body>
+</html>

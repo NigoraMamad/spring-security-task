@@ -1,42 +1,29 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
-<head>
-    <meta charset="UTF-8">
-    <title>Course List</title>
-</head>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><title>Course List</title></head>
 <body>
-
-<h2>All Courses</h2>
-
+<h2>Available Courses</h2>
 <table border="1">
+    <thead>
     <tr>
         <th>Title</th>
         <th>Description</th>
-        <th th:if="${#authorization.expression('hasRole(''ADMIN'')')}">Actions</th>
+        <th th:if="${role == 'admin'}">Actions</th>
     </tr>
-
-    <tr th:if="${#lists.isEmpty(courses)}">
-        <td colspan="3">No courses available.</td>
-    </tr>
-
+    </thead>
+    <tbody>
     <tr th:each="course : ${courses}">
-        <td th:text="${course.title}">Course Title</td>
-        <td th:text="${course.description}">Description</td>
-        <td th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
-            <a th:href="@{'/courses/edit/' + ${course.id}}">Edit</a> |
-            <a th:href="@{'/courses/delete/' + ${course.id}}">Delete</a>
+        <td th:text="${course.title}"></td>
+        <td th:text="${course.description}"></td>
+        <td th:if="${role == 'admin'}">
+            <a th:href="@{'/courses/edit/' + ${course.id}}"> Edit</a>
+            |
+            <a th:href="@{'/courses/delete/' + ${course.id}}"> Delete</a>
         </td>
     </tr>
+    </tbody>
 </table>
-
-<div th:if="${#authorization.expression('hasRole(''ADMIN'')')}">
-    <br>
-    <a th:href="@{/courses/new}">Add New Course</a>
-</div>
-
-<br>
-<a th:href="@{/}">Back to Home</a>
-
+<p th:if="${role == 'admin'}"><a th:href="@{/courses/new}"> Add New Course</a></p>
+<p><a th:href="@{/}"> Back to Home</a></p>
 </body>
 </html>

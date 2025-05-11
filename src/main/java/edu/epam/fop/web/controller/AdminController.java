@@ -4,49 +4,50 @@ import edu.epam.fop.web.dto.UserDTO;
 import edu.epam.fop.web.entity.User;
 import edu.epam.fop.web.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.List;
 
-@RestController
-@RequestMapping("/admin")
-public class AdminController {
-
+@Controller
+public class AdminController{
     private final UserService userService;
 
     public AdminController(UserService userService) {
         this.userService = userService;
     }
 
-    @PostMapping("/users")
-    public ResponseEntity<String> createUser(@RequestBody UserDTO dto) {
-        userService.createUser(dto);
-        return ResponseEntity.ok("User created");
+    @GetMapping("/admin/users")
+    public String userListView(Model model) {
+        List<User> users = userService.getAllUsers();
+        model.addAttribute("users", users);
+        return "user_list";
     }
 
-    @DeleteMapping("/users/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable("id") Long id) {
+    @GetMapping("/admin/users/new")
+    public String newUserForm(Model model) {
+        model.addAttribute("user", new UserDTO());
+        return "user_form";
+    }
+
+    @PostMapping("/admin/users")
+    public String handleCreateUser(@ModelAttribute("user") UserDTO dto) {
+        userService.createUser(dto);
+        return "redirect:/admin/users";
+    }
+
+    @PostMapping("/admin/users/delete/{id}")
+    public String deleteUserFromForm(@PathVariable("id") Long id, Principal principal) {
+        User current = userService.findByUsername(principal.getName())
+                .orElseThrow(() -> new IllegalStateException("User not found"));
+        if (current.getId().equals(id)) {
+            return "redirect:/admin/users?error=self-delete";
+        }
         userService.deleteUserById(id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/users")
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userService.getAllUsers());
-    }
-
-    @GetMapping("/users-ui")
-    public String userForm(Model model) {
-        model.addAttribute("userDTO", new UserDTO());
-        model.addAttribute("users", userService.getAllUsers());
-        return "admin_users";
-    }
-
-    @PostMapping("/users-ui")
-    public String createUserWeb(@ModelAttribute UserDTO dto) {
-        userService.createUser(dto);
-        return "redirect:/admin/users-ui";
+        return "redirect:/admin/users";
     }
 }
+
 

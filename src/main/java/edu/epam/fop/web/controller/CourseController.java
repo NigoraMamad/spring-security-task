@@ -18,22 +18,23 @@ public class CourseController {
         this.courseService = courseService;
     }
 
+    @GetMapping
+    public String listCourses(Model model) {
+        List<Course> courses = courseService.findAll();
+        model.addAttribute("courses", courses);
+        return "course_list";
+    }
+
     @GetMapping("/new")
     public String newCourseForm(Model model) {
         model.addAttribute("course", new Course());
         return "course_form";
     }
 
-    @GetMapping
-    public String listCourses(Model model) {
-        model.addAttribute("courses", courseService.findAll());
-        return "course_list";
-    }
-
     @PostMapping
     public String createCourse(@ModelAttribute Course course) {
         courseService.save(course);
-        return "redirect:/";
+        return "redirect:/courses";
     }
 
     @GetMapping("/edit/{id}")
@@ -49,12 +50,12 @@ public class CourseController {
         existing.setTitle(course.getTitle());
         existing.setDescription(course.getDescription());
         courseService.save(existing);
-        return "redirect:/";
+        return "redirect:/courses";
     }
 
     @GetMapping("/delete/{id}")
-    public String deleteCourse(@PathVariable Long id) {
+    public String deleteCourse(@PathVariable("id") Long id) {
         courseService.deleteById(id);
-        return "redirect:/";
+        return "redirect:/courses";
     }
 }
