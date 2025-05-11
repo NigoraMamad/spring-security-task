@@ -4,6 +4,8 @@ import edu.epam.fop.web.dto.UserDTO;
 import edu.epam.fop.web.entity.User;
 import edu.epam.fop.web.service.UserService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,13 @@ public class AdminController{
     public String userListView(Model model) {
         List<User> users = userService.getAllUsers();
         model.addAttribute("users", users);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        model.addAttribute("username", auth.getName());
+        model.addAttribute("role", auth.getAuthorities().stream()
+                .map(a -> a.getAuthority().replace("ROLE_", "").toLowerCase())
+                .findFirst().orElse("user"));
+
         return "user_list";
     }
 
